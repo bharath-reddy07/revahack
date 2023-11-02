@@ -18,7 +18,7 @@
 
 ## Hardware 
 
-- ESP 32                                                                           
+- Raspberry PI pico                                                                          
 - Rotary Encoder                                                                 
 - OLED
 - Buzzer
