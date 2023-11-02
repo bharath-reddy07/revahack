@@ -1,5 +1,5 @@
-# revahack
-INTRODUCTION
+# HARDWARE PASSWORD MANAGER
+## Introduction
 
 Password security is of paramount importance in today's digital landscape, where individuals and organizations rely heavily on online services, websites, and various digital platforms.
 Passwords serve as the primary defense mechanism for protecting personal and sensitive information, and their strength and integrity are crucial in preventing unauthorized access and potential data breaches.
@@ -7,16 +7,16 @@ Software-based password management offers convenience and security by enabling u
 Thus it is imperative that we switch to hardware based password management system to enhance the security and ensure privacy of the user.
 
 
-HOW OUR SOLUTION WORKS
+## How our solution works
 
 The hardware-based password manager uses a microcontroller ESP32 that securely stores a user's passwords. 
 When connected to a computer, it allows the user to select the desired account. With a simple click on a rotary encoder, the microcontroller automatically inputs the corresponding password into the computer, eliminating the need for manual entry. 
 This streamlined process ensures efficient and convenient access to various accounts while maintaining a high level of security. The device serves as a reliable and user-friendly solution for managing multiple passwords in a hardware-encrypted environment.
 
 
-TECH STACK
+## Tech Stack
 
-HARDWARE 
+## Hardware 
 
 ESP 32                                                                           
 Rotary Encoder                                                                 
@@ -24,10 +24,7 @@ OLED
 Buzzer
 LED
 
-SOFTWARE
+## Software
 
 Arduino IDE
 Flask
-
-
-
