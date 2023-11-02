@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+Home Page
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Welcome to your Password Manager</h2>
+    <p>Enter the OTP</p>
+    
+    <div class="container" style="background-color: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+        <h1>OTP Processor</h1>
+        <form method="POST" id="otp-form">
+            <div class="form-group">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" name="otp" id="otp" class="form-control" placeholder="123456" required>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary" id="process-btn">Process OTP</button>
+        </form>
+        
+        <div id="result-container" style="display: none;">
+            <h2>Processed OTP:</h2>
+            <p id="result" style="background-color: #5F70A4; padding: 10px; border: 1px solid #bce8f1; border-radius: 5px;"></p>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#otp-form').submit(function(event) {
+            event.preventDefault();
+            var otpValue = $('#otp').val();
+            var processedOTP = otpValue.split('').reverse().join('');
+            
+            // Hide the form
+            $('#otp-form').hide();
+            
+            // Display the result
+            $('#result-container').show();
+            $('#result').text(processedOTP);
+        });
+    });
+</script>
+{% endblock %}
