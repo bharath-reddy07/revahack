@@ -317,9 +317,16 @@ void handleChange() {
     }
     readFromFlash(&f, (1 + value) * 64);
     aes256.decryptBlock(decryptedText, (uint8_t*)f.cipher);
-    Serial.println(String(f.name) + "'" + String((char*)decryptedText));
-    Serial2.println(String(f.name) + "'" + String((char*)decryptedText));
-    Keyboard.print(String(f.name) + "\n" + String((char*)decryptedText));
+    Serial.println(String(f.id) + "'" + String((char*)decryptedText));
+    Keyboard.print(String(f.id));
+    Keyboard.press(KEY_RETURN);
+    delay(10);
+    Keyboard.release(KEY_RETURN);
+    delay(7000);
+    Keyboard.print(String((char*)decryptedText));
+    Keyboard.press(KEY_RETURN);
+    delay(10);
+    Keyboard.release(KEY_RETURN);
     //Serial.println((char *)decryptedText);
     return;
   }
@@ -583,6 +590,7 @@ void takeInput() {
     topStuff();
     display.setCursor(0, 16);
     display.print(tempStr);
+    Serial.print(tempStr);
     display.display();
 
     int mil = millis();
