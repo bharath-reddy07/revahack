@@ -6,11 +6,11 @@ Home Page
 
 {% block content %}
 <div class="container">
-    <h2 style="margin-bottom:5cqmax;">Welcome to your Password Manager</h2>
+    <h2 class="heading">Welcome to your Password Manager</h2>
     
-    <div class="container" style="background-color: #222535; border: 1px solid #ccc; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+    <div class="container container2" >
 
-        <button type="submit" class="btn btn-primary" id="process-btn" style="background-color: #556284; border-color: aliceblue;">Get Key</button>
+        <button type="submit" class="btn btn-primary" id="process-btn" >Get Key</button>
 
         
         <div id="result-container" >
@@ -19,30 +19,6 @@ Home Page
     </div>
 </div>
 
-<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 <script src="../static/js/home_page.js"></script>
-<!-- <script>
-    $(document).ready(function() {
-        $('#otp-form').submit(function(event) {
-            event.preventDefault();
-            var otpValue = $('#otp').val();
-            var processedOTP = otpValue.split('').reverse().join('');
-            
-            // Hide the form
-            $('#otp-form').hide();
-            
-            // Display the result and "Re-enter OTP" link
-            $('#result-container').show();
-            $('#result').text(processedOTP);
-            
-            // Handle "Re-enter OTP" link click
-            $('#re-enter-link').click(function() {
-                // Clear the result, show the form, and hide the "Re-enter OTP" link
-                $('#result').text('');
-                $('#otp-form').show();
-                $('#result-container').hide();
-            });
-        });
-    });
-</script> -->
+
 {% endblock %}
