@@ -9,28 +9,19 @@ Home Page
     <h2 style="margin-bottom:5cqmax;">Welcome to your Password Manager</h2>
     
     <div class="container" style="background-color: #222535; border: 1px solid #ccc; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); text-align: center;">
-        <form method="POST" id="otp-form">
-            <div class="form-group">
-                <label for="otp">Enter OTP</label>
-                <input type="text" name="otp" id="otp" class="form-control" placeholder="123456" required>
-            </div>
-            <br>
-            <button type="submit" class="btn btn-primary" id="process-btn" style="background-color: #556284; border-color: aliceblue;">Get Key</button>
-        </form>
+
+        <button type="submit" class="btn btn-primary" id="process-btn" style="background-color: #556284; border-color: aliceblue;">Get Key</button>
+
         
-        <div id="result-container" style="display: none; ">
-            <p id="result" style="background-color: #161a30; padding: 10px; border: 1px solid #bce8f1; border-radius: 5px;font-size:xx-large; border-color: #c5c7d2;"></p>
-            <p style="text-align: center; color: #5F70A4;">
-                <em>
-                    <a href="#" id="re-enter-link" style="color: aliceblue; text-decoration: underline;">Re-enter OTP</a>
-                </em>
-            </p>
+        <div id="result-container" >
+
         </div>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="../static/js/home_page.js"></script>
+<!-- <script>
     $(document).ready(function() {
         $('#otp-form').submit(function(event) {
             event.preventDefault();
@@ -53,5 +44,5 @@ Home Page
             });
         });
     });
-</script>
+</script> -->
 {% endblock %}
