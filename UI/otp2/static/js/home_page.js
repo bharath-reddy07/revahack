@@ -21,5 +21,6 @@ async function request_otp(){
     }, 2000);
     errorBox.addEventListener('transitionend', () => errorBox.remove());
 
+
 }
 
