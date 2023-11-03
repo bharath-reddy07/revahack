@@ -12,10 +12,9 @@ def process_otp():
     processed_otp = otp[::-1] 
     return redirect(url_for('result_page', result=processed_otp))
 
-@app.route('/result_page')
-def result_page():
-    result = request.args.get('result', default='')
-    return render_template('result_page.html', result=result)
+@app.route('/backup')
+def backup():
+    return render_template('backup.html')
 
 
 
