@@ -12,6 +12,7 @@
 #include "Adafruit_FRAM_I2C.h"
 #include "pio_encoder.h"
 #include <Adafruit_Fingerprint.h>
+#include <Keyboard.h>
 
 #define mySerial Serial1
 
@@ -76,7 +77,7 @@ int numState0 = 1;
 char state0[1][32] = { "Place your finger to auth" };
 
 int numState1 = 1;
-char state1[1][32] = { "" };
+char state1[1][32] = {""};
 ;
 char state1Input[32];
 
@@ -141,6 +142,7 @@ int greenPin = 11;
 void setup() {
   Serial.begin(115200);
   Serial2.begin(115200);
+  Keyboard.begin();
   pinMode(redPin, OUTPUT);  //red
   pinMode(greenPin, OUTPUT);  // green
   digitalWrite(redPin, HIGH);
@@ -179,8 +181,18 @@ void loop() {
 
   Serial.println(menuItems[value]);
   displayMessage(menuItems[value]);
+  runCode();
   rotary_loop();
   delay(50);
+}
+void runCode()
+{
+  if(state==1)
+  {
+    display.clearDisplay();
+    delay(100);
+    handleChange();
+  }
 }
 void handleChange() {
   if (state == 0) {
@@ -192,9 +204,11 @@ void handleChange() {
     int fingerprintID = getFingerprint();
     if(fingerprintID > 0){
       updateState(3);
+      return;
     }
     else{
       updateState(0);
+      return;
     }
     // Serial.println("CHECKING pass");
     // //Check Master Password
@@ -249,6 +263,7 @@ void handleChange() {
     aes256.decryptBlock(decryptedText, (uint8_t*)f.cipher);
     Serial.println(String(f.name) + "'" + String((char*)decryptedText));
     Serial2.println(String(f.name) + "'" + String((char*)decryptedText));
+    Keyboard.print(String(f.name) + "\n" + String((char*)decryptedText));
     //Serial.println((char *)decryptedText);
     return;
   }
@@ -396,8 +411,8 @@ void displayMessage(char* message) {
     if (!digitalRead(4) && millis() - mil < 200) {
       clearDisplay();
       handleChange();
-      return;
       delay(500);
+      return;
     }
     return;
   }
@@ -409,8 +424,9 @@ void displayMessage(char* message) {
     if (!digitalRead(4) && millis() - mil < 200) {
       clearDisplay();
       handleChange();
-      return;
       delay(500);
+      return;
+      
     }
     display.display();
     x = x - SCROLL_SPEED;
