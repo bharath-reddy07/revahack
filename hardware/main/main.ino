@@ -73,7 +73,7 @@ char tempPass[16] = "";
 uint8_t numBlocks = 0;
 
 int numState0 = 1;
-char state0[1][32] = { "Place your finger to authenticate" };
+char state0[1][32] = { "Place your finger to auth" };
 
 int numState1 = 1;
 char state1[1][32] = { "" };
@@ -136,13 +136,15 @@ bool testMaster(AES256* aes256, byte* key_hash, const struct cipherVector* testC
   Serial.print(int(valid));
   return valid;
 }
+int redPin = 11;
+int greenPin = 11;
 void setup() {
   Serial.begin(115200);
   Serial2.begin(115200);
-  pinMode(4, OUTPUT);  //red
-  pinMode(3, OUTPUT);  // green
-  digitalWrite(4, HIGH);
-  digitalWrite(3, HIGH);
+  pinMode(redPin, OUTPUT);  //red
+  pinMode(greenPin, OUTPUT);  // green
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, HIGH);
 
   // set the data rate for the sensor serial port
   mySerial.setTX(12);
@@ -188,7 +190,7 @@ void handleChange() {
   }
   if (state == 1) {
     int fingerprintID = getFingerprint();
-    if(fingerprintID == 1){
+    if(fingerprintID > 0){
       updateState(3);
     }
     else{
@@ -547,19 +549,19 @@ int getFingerprint() {
   Serial.println(fingerprintID);
   if (fingerprintID < 0) {
     //no match
-    digitalWrite(4, LOW);
-    digitalWrite(3, HIGH);
+    digitalWrite(redPin, LOW);
+    digitalWrite(greenPin, HIGH);
     delay(1000);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, HIGH);
-    return 1;
+    digitalWrite(redPin, HIGH);
+    digitalWrite(greenPin, HIGH);
   } else if (fingerprintID > 0) {
     //match
-    digitalWrite(4, HIGH);
-    digitalWrite(3, LOW);
+    digitalWrite(redPin, HIGH);
+    digitalWrite(greenPin, LOW);
     delay(1000);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, HIGH);
+    digitalWrite(redPin, HIGH);
+    digitalWrite(greenPin, HIGH);
+    return 1;
   }
   // else{
   //   digitalWrite(2, HIGH);
