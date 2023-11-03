@@ -454,7 +454,7 @@ void clearStruct() {
 }
 void rotary_loop()
 {
-  if(!(encoder.getCount()/2 == value)&& state!=0)
+  if(!(encoder.getCount()/2 == value)&& (state!=0) || (state!=5) || (state!=7)||(state!=9))
   {
     display.clearDisplay();
     topStuff();
@@ -468,10 +468,10 @@ void rotary_loop()
 
 void takeInput(){
   strcpy(userInput, "");
-  int numChars = 39;
-  char chars[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
+  int numChars = 40;
+  char chars[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "<--", "OK" };
   Serial.println("HERE");
-  value = (encoder.getCount()/2)%numChars;
+  value = (encoder.getCount()/2)%numChars; //////////////REMOVE THIS
   char tempStr[32];
   delay(500);
   while (1){
@@ -479,7 +479,7 @@ void takeInput(){
     Serial.println(userInput);
     value = encoder.getCount()/2;
     if (value<0) 
-      value = value+numChars;
+      value = (value%numChars) + numChars;
     value = value%numChars;
     Serial.println(value);
     strcpy(tempStr, userInput);
@@ -494,12 +494,19 @@ void takeInput(){
     int mil = millis();
     if(!digitalRead(4) && millis() - mil <200){
       Serial.println("click");
-      if (value == 38) {
+      if (value == 39) { //OK
         display.clearDisplay();
         return;
       }
-        
-      strcat(userInput, chars[value]);
+
+      if (value == 38 ) { //B.Space
+        if (strlen(userInput)>0)
+          userInput[strlen(userInput)-1] = '\0';
+      }
+      else{
+        strcat(userInput, chars[value]);
+      }
+      
       
       delay(500);
     }
@@ -509,5 +516,5 @@ void takeInput(){
   }
 }
 
-  //CONFIRM gibberish
+
   
