@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Backups
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Backup</h2>
+    <p style="font-size: large; margin-top: 1cqmax; font-style: italic; color: rgb(211, 219, 219);">Back up Your Passwords, Or View Previously Backed Up Passwords.</p>
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <div class="text-center">
+            <div class="d-flex">
+                <button class="btn btn-primary btn-lg mr-5" id="backup-button" style="background-color: #2b3654;border-color: aliceblue; margin-right: 10cqmax; font-size: x-large;">Backup</button>
+                <button class="btn btn-primary btn-lg" id="display-button" style="background-color: #2b3654; border-color: aliceblue; margin-left: 15cqmax; font-size: x-large;">Display Backed Up Data</button>
+            </div>
+        </div>
+    </div>
+    <div id="backup-content" style="display: none;">
+        <p>Backup Successful</p>
+    </div>
+    <div id="display-content" style="display: none;">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Backed Up Passwords</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pwd 1</td>
+                </tr>
+                <tr>
+                    <td>Pwd 2</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('backup-button').addEventListener('click', function() {
+        document.getElementById('backup-content').style.display = 'block';
+        document.getElementById('display-content').style.display = 'none';
+    });
+
+    document.getElementById('display-button').addEventListener('click', function() {
+        document.getElementById('display-content').style.display = 'block';
+        document.getElementById('backup-content').style.display = 'none';
+    });
+</script>
+{% endblock %}
