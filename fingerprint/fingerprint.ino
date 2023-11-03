@@ -8,6 +8,9 @@ void setup() {
   while (!Serial)
     ;
   delay(100);
+
+  pinMode(4, OUTPUT);
+  pinMode(3, OUTPUT);
   Serial.println("\n\nAdafruit finger detect test");
 
   // set the data rate for the sensor serial port
@@ -23,7 +26,28 @@ void setup() {
 
 void loop()  // run over and over again
 {
-  Serial.println(getFingerprintID());
+  int fingerprintID = getFingerprintID();
+  Serial.println(fingerprintID);
+  if(fingerprintID < 0){
+    //no match
+    digitalWrite(4, LOW);
+    digitalWrite(3, HIGH);
+    delay(1000);
+    digitalWrite(4, HIGH);
+    digitalWrite(3, HIGH);
+  }
+  else if(fingerprintID > 0){
+    //match
+    digitalWrite(4, HIGH);
+    digitalWrite(3, LOW);
+    delay(1000);
+    digitalWrite(4, HIGH);
+    digitalWrite(3, HIGH);
+  }
+  // else{
+  //   digitalWrite(2, HIGH);
+  //   digitalWrite(3, HIGH);
+  // }
   delay(50);  //don't ned to run this at full speed.
 }
 
@@ -53,5 +77,5 @@ int getFingerprintID() {
   }
 
 
-  return -1;
+  return 0;
 }
