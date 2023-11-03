@@ -58,48 +58,49 @@ cipherVector data[64];
 
 void copyArray(char array1[100][32], char array2[100][32], int arraySize);
 
+char userInput[32];
 
 int numItems = 1;
 int state = 0;
 char menuItems[100][32] = { "Passwords", "Long message", "Very long message", "Very very long message", "short" };
-int numState0 = 1;
+
 char tempPass[16] = "";
 uint8_t numBlocks = 0;
 
+int numState0 = 1;
 char state0[1][32] = { "Enter the master password" };
 
+int numState1 = 1;
+char state1[1][32] = {""};;
+char state1Input[32];
 
-int numState1 = 39;
-char state1[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
-char state1Input[32] = "";
+
 int numState2 = 1;
-int blocks;
 char state2[1][32] = { "Password incorrect" };
 
 int numState3 = 5;
 char state3[5][32] = { "Login", "Add", "Backup", "Reset", "Exit" };
 int value = 0;
 
-int numState4 = 1;
+int numState4 = 0;
 char state4[100][32] = {};
 
 int numState5 = 1;
 char state5[1][32] = { "Enter website name" };
 
 int numState6 = 39;
-char state6[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
+char state6[1][32] = {""};
 
 int numState7 = 1;
 char state7[1][32] = { "Enter user name" };
 
 int numState8 = 39;
-char state8[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
-
+char state8[1][32] = {""};
 int numState9 = 1;
 char state9[1][32] = { "Enter password" };
 
 int numState10 = 39;
-char state10[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
+char state10[1][32] = {""};
 
 int numState11 = 1;
 char state11[1][32] = { "Password saved" };
@@ -147,50 +148,56 @@ void setup() {
 
 void loop() {
   Serial.println("Hello");
+  //buffer[0] = 0;
+  //buffer[1] = 0;
+  //i2ceeprom.write((uint16_t)0, buffer, 2);
+  
   Serial.println(menuItems[value]);
   displayMessage(menuItems[value]);
   rotary_loop();
-  delay(500);
+  delay(50);
 }
 void handleChange() {
   if (state == 0) {
+    takeInput();        //takes input and puts it in userInput
     updateState(1);
     return;
   }
   if (state == 1) {
-    if (value == 38) {  //ok
-      //Check Master Password
-      sha256.reset();
-      sha256.update(state1Input, strlen(state1Input));
-      sha256.finalize(key_hash, sizeof(key_hash));
-      aes256.setKey(key_hash, aes256.keySize());
+    Serial.println("CHECKING pass");
+    //Check Master Password
+    sha256.reset();
+    sha256.update(userInput, strlen(userInput));
+    sha256.finalize(key_hash, sizeof(key_hash));
+    aes256.setKey(key_hash, aes256.keySize());
 
-      byte ecrt[16];
-      char passwrd[16];
-      strcpy(passwrd, "lmao");
-      aes256.encryptBlock(f.cipher, (uint8_t*)passwrd);
+    byte ecrt[16];
+    char passwrd[16];
+    strcpy(passwrd, "lmao");
+    aes256.encryptBlock(f.cipher, (uint8_t*)passwrd);
 
 
-      if (testMaster(&aes256, key_hash, &cipher1)) {
-        strcpy(f.id, "p gmail");
-        strcpy(f.name, "lol");
-        writeToFlash(&f, (uint16_t)64);
-        updateState(3);
-        return;
-      }
-
-      else {
-        strcpy(state1Input, "");
-        updateState(0);
-        return;
-      }
-
-    } else {
-      //append character to string
-      strcat(state1Input, menuItems[value]);
-      Serial.println(state1Input);
-      displayMessage(state1Input);
+    if (testMaster(&aes256, key_hash, &cipher1)) {
+      strcpy(f.id, "p gmail");
+      strcpy(f.name, "lol");
+      writeToFlash(&f, (uint16_t)64);
+      updateState(3);
+      return;
     }
+
+    else {
+      strcpy(userInput, "");
+      updateState(0);
+      return;
+    }
+
+
+    // else {
+    //   //append character to string
+    //   strcat(state1Input, menuItems[value]);
+    //   Serial.println(state1Input);
+    //   displayMessage(state1Input);
+    // }
   }
   if (state == 3) {
     if (value == 0) {
@@ -203,7 +210,7 @@ void handleChange() {
     }
   }
   if (state == 4) {
-    if(value==blocks)
+    if(value == numItems - 1)
     {
       updateState(3);
       return;
@@ -217,51 +224,35 @@ void handleChange() {
 
   if (state == 5) {
     clearStruct();
-    updateState(6);
+    takeInput();
+    strcpy(f.name, userInput);
+    updateState(7);
     return;
   }
-  if (state == 6) {
-    if (value == 38) {
-      updateState(7);
-      return;
-
-    } else {
-      //append character to string
-      strcat(f.id, menuItems[value]);
-      Serial.println(state1Input);
-    }
+  if (state == 6) { ////BEDAAAAAAAAAAAAAAAAAAAAAAA
+     updateState(7);
   }
 
   if (state == 7) {
-    updateState(8);
+    takeInput();
+    strcpy(f.id, userInput);
+    updateState(9);
     return;
   }
   if (state == 8) {
-    if (value == 38) {
-      updateState(9);
-      return;
-
-    } else {
-      //append character to string
-      strcat(f.name, menuItems[value]);
-      Serial.println(state1Input);
-    }
+    updateState(9);
   }
 
   if (state == 9) {
-    updateState(10);
+    takeInput();
+    //userInput has pass
+    strcpy(tempPass, userInput);
+    
+    updateState(11);
     return;
   }
   if (state == 10) {
-    if (value == 38) {
-      updateState(11);
-      return;
-
-    } else {
-      //append character to string
-      strcat(tempPass, menuItems[value]);
-      Serial.println(state1Input);
-    }
+    updateState(11);
   }
   if (state == 11) {
     aes256.encryptBlock(f.cipher, (uint8_t*)tempPass);
@@ -281,54 +272,46 @@ void updateState(int newState) {
     case 0:
       state = 0;
       numItems = numState0;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state0, numItems);
       value = 0;
       break;
     case 1:
       state = 1;
       numItems = numState1;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state1, numItems);
       value = 0;
       break;
     case 2:
       state = 2;
       numItems = numState2;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state2, numItems);
       value = 0;
       break;
     case 3:
       state = 3;
       numItems = numState3;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state3, numItems);
       value = 0;
       break;
     case 4:
       state = 4;
       i2ceeprom.read((uint16_t)0, &numBlocks, (uint16_t)1);
-      numItems = numBlocks+1;
-      numState4 = numItems;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
-      copyArray(menuItems, state4, numItems);
-
-
-
+      
+      
       for (int i = 0; i < numBlocks; i++) {
         readFromFlash(&data[0], (1 + i) * 64);
         strcpy(menuItems[i], data->id);
         strcat(menuItems[i], "   :   ");
         strcat(menuItems[i], data->name);
       }
-      strcpy(menuItems[numBlocks-1],"back");
-      blocks=numBlocks-1;
+      strcpy(menuItems[numBlocks],"back");
+      numItems = numBlocks+1;
+      
+      
       break;
     case 5:
       state = 5;
       numItems = numState5;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state5, numItems);
       break;
     case 6:
@@ -358,13 +341,11 @@ void updateState(int newState) {
     case 10:
       state = 10;
       numItems = numState10;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state10, numItems);
       break;
     case 11:
       state = 11;
       numItems = numState11;
-      //rotaryEncoder.setBoundaries(0, numItems - 1, true);
       copyArray(menuItems, state11, numItems);
       break;
   }
@@ -379,6 +360,13 @@ void displayMessage(char* message) {
     display.setCursor(0, 16);
     display.print(message);
     display.display();
+    int mil = millis();
+  if(!digitalRead(4) && millis() - mil <200){
+      clearDisplay();
+      handleChange();
+      return;
+      delay(500);
+  }
     return;
   }
   while (x > minX) {
@@ -396,13 +384,7 @@ void displayMessage(char* message) {
     x = x - SCROLL_SPEED;
     clearDisplay();
   }
-  int mil = millis();
-  if(!digitalRead(4) && millis() - mil <200){
-      clearDisplay();
-      handleChange();
-      return;
-      delay(500);
-  }
+  
   x = display.width();
 }
 
@@ -472,15 +454,60 @@ void clearStruct() {
 }
 void rotary_loop()
 {
-  if(!(encoder.getCount()/2 == value))
+  if(!(encoder.getCount()/2 == value)&& state!=0)
   {
-    value=encoder.getCount()/2;
-    //clearDisplay();
+    display.clearDisplay();
+    topStuff();
   }
-  if(value>=numItems)
-  {
-    value=0;
-    //clearDisplay();
-  }
+  value = encoder.getCount()/2;
+  if (value<0) 
+    value = numItems-1;
+  value = value%numItems;
   
 }
+
+void takeInput(){
+  strcpy(userInput, "");
+  int numChars = 39;
+  char chars[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "OK" };
+  Serial.println("HERE");
+  value = (encoder.getCount()/2)%numChars;
+  char tempStr[32];
+  delay(500);
+  while (1){
+    Serial.print("START: ");
+    Serial.println(userInput);
+    value = encoder.getCount()/2;
+    if (value<0) 
+      value = value+numChars;
+    value = value%numChars;
+    Serial.println(value);
+    strcpy(tempStr, userInput);
+    strcat(tempStr, chars[value]);
+    display.clearDisplay();
+    display.setCursor(0,0);
+    topStuff();
+    display.setCursor(0,16);
+    display.print(tempStr);
+    display.display();
+    
+    int mil = millis();
+    if(!digitalRead(4) && millis() - mil <200){
+      Serial.println("click");
+      if (value == 38) {
+        display.clearDisplay();
+        return;
+      }
+        
+      strcat(userInput, chars[value]);
+      
+      delay(500);
+    }
+    Serial.print("END: ");
+    Serial.println(userInput);
+    delay(50);
+  }
+}
+
+  //CONFIRM gibberish
+  
