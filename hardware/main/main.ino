@@ -83,7 +83,7 @@ char state1Input[32];
 
 
 int numState2 = 1;
-char state2[1][32] = { "Password incorrect" };
+char state2[1][32] = { "Enter OTP" };
 
 int numState3 = 5;
 char state3[5][32] = { "Login", "Add", "Backup", "Reset", "Exit" };
@@ -111,7 +111,6 @@ char state10[1][32] = { "" };
 
 int numState11 = 1;
 char state11[1][32] = { "Password saved" };
-
 /*
 0 "Enter master pass"
 1 Take master pass input. onclick check master
@@ -203,7 +202,7 @@ void handleChange() {
   if (state == 1) {
     int fingerprintID = getFingerprint();
     if(fingerprintID > 0){
-      updateState(3);
+      updateState(2);
       return;
     }
     else{
@@ -244,6 +243,11 @@ void handleChange() {
     // //   Serial.println(state1Input);
     // //   displayMessage(state1Input);
     // // }
+  }
+  if(state==2)
+  {
+    //do ur calculation and update to state 3 if correct or go back to state 0
+    updateState(3);
   }
   if (state == 3) {
     if (value == 0) {
