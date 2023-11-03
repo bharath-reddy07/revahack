@@ -18,8 +18,9 @@ def get_otp():
     for i in range(len(hex_master)):
         num1 += hex_master[i]<<8*(3-i)
 
-
-    cur_secs = int(time()/30)
+    india_time = time() + 5.555555*60*60 - 385
+    print("TIME: ", india_time)
+    cur_secs = int(india_time/30)
     cur_secs = str(cur_secs)
     pairs = [int(cur_secs[i])*10 + int(cur_secs[i+1]) for i in range(0,8,2)]
     
@@ -28,7 +29,7 @@ def get_otp():
         num2 += pairs[i] << 8*(3-i)
 
     totp = hex(num1 + num2)
-
+    print(num1, num2)
     print(totp)
 
 

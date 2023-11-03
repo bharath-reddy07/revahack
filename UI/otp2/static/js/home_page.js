@@ -18,7 +18,7 @@ async function request_otp(){
 
     setTimeout(() => {
         para.style.opacity = '0';
-    }, 2000);
+    }, 20000);
     errorBox.addEventListener('transitionend', () => errorBox.remove());
 
 

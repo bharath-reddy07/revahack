@@ -13,6 +13,9 @@
 #include "pio_encoder.h"
 #include <Adafruit_Fingerprint.h>
 #include <Keyboard.h>
+#include "RTClib.h"
+
+RTC_DS1307 rtc;
 
 #define mySerial Serial1
 
@@ -54,7 +57,8 @@ cipherVector const cipher1 = {
   "Test",
   "123456789012345",
   { 0x5D, 0x16, 0x26, 0x6E, 0x10, 0xB8, 0xE5, 0xFE,
-    0x76, 0x4C, 0x3A, 0x2B, 0xD6, 0x80, 0xAE, 0xF6 }  //123456789012345
+    0x76, 0x4C, 0x3A, 0x2B, 0xD6, 0x80, 0xAE, 0xF6
+  }  //123456789012345
 };
 
 byte buffer[sizeof(cipherVector)];
@@ -112,17 +116,17 @@ char state10[1][32] = { "" };
 int numState11 = 1;
 char state11[1][32] = { "Password saved" };
 /*
-0 "Enter master pass"
-1 Take master pass input. onclick check master
-2 "Incorrect" (one more variable for keeping track of number of incorrect)
-3 "login", "add", "backup", "reset", "exit"
-4 website name (login menu)
-5 "enter website"
-6 take website
-7 "enter uname"
-8 take uname input
-9 "enter pass"
-10 take pass
+  0 "Enter master pass"
+  1 Take master pass input. onclick check master
+  2 "Incorrect" (one more variable for keeping track of number of incorrect)
+  3 "login", "add", "backup", "reset", "exit"
+  4 website name (login menu)
+  5 "enter website"
+  6 take website
+  7 "enter uname"
+  8 take uname input
+  9 "enter pass"
+  10 take pass
 
 */
 bool testMaster(AES256* aes256, byte* key_hash, const struct cipherVector* testCipher) {
@@ -131,6 +135,7 @@ bool testMaster(AES256* aes256, byte* key_hash, const struct cipherVector* testC
   bool valid = true;
   for (int i = 0; i < KEY_SIZE; i++) {
     valid &= decryptedText[i] == testCipher->id[i];
+    Serial.println(decryptedText[i] + ": ");
   }
   Serial.print("Master password is ");
   Serial.print(int(valid));
@@ -156,14 +161,22 @@ void setup() {
     Serial.println("Found fingerprint sensor!");
   } else {
     Serial.println("Did not find fingerprint sensor :(");
-    while (1) { delay(1); }
+    while (1) {
+      delay(1);
+    }
   }
   while (!Serial)
     ;
   setupDisplay();
-  Serial.println("Hello");
+
   //setupRotaryEncoder();
   setupFlash();
+  if (!rtc.begin(&Wire)) {
+    Serial.println("Couldn't find RTC");
+    return;
+  }
+  //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  Serial.println("RTC Initialized");
   encoder.begin();
   pinMode(4, INPUT_PULLUP);
   copyArray(menuItems, state0, numState0);
@@ -173,12 +186,14 @@ void setup() {
 
 
 void loop() {
-  Serial.println("Hello");
-  //buffer[0] = 0;
-  //buffer[1] = 0;
-  //i2ceeprom.write((uint16_t)0, buffer, 2);
+  //  Serial.print("TIME: ");
+  //  Serial.println(getCurrentTime());
 
-  Serial.println(menuItems[value]);
+//  buffer[0] = 0;
+//  buffer[1] = 0;
+//  i2ceeprom.write((uint16_t)0, buffer, 2);
+
+  //Serial.println(menuItems[value]);
   displayMessage(menuItems[value]);
   runCode();
   rotary_loop();
@@ -186,7 +201,7 @@ void loop() {
 }
 void runCode()
 {
-  if(state==1)
+  if (state == 1)
   {
     display.clearDisplay();
     delay(100);
@@ -201,11 +216,11 @@ void handleChange() {
   }
   if (state == 1) {
     int fingerprintID = getFingerprint();
-    if(fingerprintID > 0){
+    if (fingerprintID > 0) {
       updateState(2);
       return;
     }
-    else{
+    else {
       updateState(0);
       return;
     }
@@ -237,17 +252,53 @@ void handleChange() {
     // }
 
 
-    // // else {
-    // //   //append character to string
-    // //   strcat(state1Input, menuItems[value]);
-    // //   Serial.println(state1Input);
-    // //   displayMessage(state1Input);
-    // // }
+    // else {
+    //   //append character to string
+    //   strcat(state1Input, menuItems[value]);
+    //   Serial.println(state1Input);
+    //   displayMessage(state1Input);
+    // }
   }
-  if(state==2)
+  if (state == 2)
   {
     //do ur calculation and update to state 3 if correct or go back to state 0
-    updateState(3);
+    unsigned long curTime = getCurrentTime();
+    takeInput();
+    //userInput has totp
+    char masterPass[5];
+
+
+    getMasterFromTotp(userInput, masterPass, curTime);
+    Serial.println(String(userInput) + " " + String(masterPass));
+
+    // check Master pass here
+    Serial.println("CHECKING pass");
+    //Check Master Password
+    sha256.reset();
+    sha256.update(masterPass, strlen(masterPass));
+    sha256.finalize(key_hash, sizeof(key_hash));
+    aes256.setKey(key_hash, aes256.keySize());
+
+    byte ecrt[16];
+    char passwrd[16];
+    // strcpy(passwrd, "lmao");
+    aes256.encryptBlock(f.cipher, (uint8_t*)passwrd);
+
+
+    if (testMaster(&aes256, key_hash, &cipher1)) {
+      //   strcpy(f.id, "p gmail");
+      //   strcpy(f.name, "lol");
+      //   writeToFlash(&f, (uint16_t)64);
+      Serial.println("Master verified");
+      updateState(3);
+      return;
+    }
+
+    else {
+      strcpy(userInput, "");
+      updateState(0);
+      return;
+    }
   }
   if (state == 3) {
     if (value == 0) {
@@ -264,6 +315,7 @@ void handleChange() {
       updateState(3);
       return;
     }
+    readFromFlash(&f, (1 + value) * 64);
     aes256.decryptBlock(decryptedText, (uint8_t*)f.cipher);
     Serial.println(String(f.name) + "'" + String((char*)decryptedText));
     Serial2.println(String(f.name) + "'" + String((char*)decryptedText));
@@ -430,7 +482,7 @@ void displayMessage(char* message) {
       handleChange();
       delay(500);
       return;
-      
+
     }
     display.display();
     x = x - SCROLL_SPEED;
@@ -508,23 +560,22 @@ void clearStruct() {
 
 void rotary_loop()
 {
-  value = encoder.getCount()/2;
-  value = ((value%numItems) + numItems)%numItems;
+  value = encoder.getCount() / 2;
+  value = ((value % numItems) + numItems) % numItems;
 }
 
 void takeInput() {
   strcpy(userInput, "");
   int numChars = 40;
   char chars[50][32] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "@", ".", "<--", "OK" };
-  Serial.println("HERE");
   char tempStr[32];
   delay(500);
   while (1) {
-    Serial.print("START: ");
-    Serial.println(userInput);
-    value = encoder.getCount()/2;
-    value = ((value%numChars) + numChars)%numChars;
-    Serial.println(value);
+    //    Serial.print("START: ");
+    //    Serial.println(userInput);
+    value = encoder.getCount() / 2;
+    value = ((value % numChars) + numChars) % numChars;
+    //    Serial.println(value);
     strcpy(tempStr, userInput);
     strcat(tempStr, chars[value]);
     display.clearDisplay();
@@ -552,8 +603,8 @@ void takeInput() {
 
       delay(500);
     }
-    Serial.print("END: ");
-    Serial.println(userInput);
+    //    Serial.print("END: ");
+    //    Serial.println(userInput);
     delay(50);
   }
 }
@@ -601,7 +652,7 @@ int getFingerprintID() {
     return -1;
   }
 
-  if(finger.fingerID > 0 && finger.fingerID < 255){
+  if (finger.fingerID > 0 && finger.fingerID < 255) {
     // found a match!
     Serial.print("Found ID #");
     Serial.print(finger.fingerID);
@@ -612,4 +663,48 @@ int getFingerprintID() {
 
 
   return 0;
+}
+
+void getMasterFromTotp(char *totp, char *masterPass, unsigned long curTime) {
+  Serial.print("TOTP:" );
+  Serial.println(totp);
+  Serial.print("CUR TIME: ");
+  Serial.println(curTime);
+  String totpStr = String(totp);
+  Serial.println(totpStr);
+  unsigned long num1 = strtoul(totpStr.c_str(), NULL, 16);
+
+  curTime = curTime / 30;
+
+  int twos[4];  // 56, 39, 42, 05
+  int k = 0;
+  while (curTime) {
+    twos[k++] = curTime % 100;
+    curTime /= 100;
+  }
+
+  unsigned long num2 = 0;
+  for (int i = 0; i < 4; i++) {
+    num2 += twos[i] << 8 * i;
+  }
+
+  unsigned long masterPassVal = num1 - num2;
+  Serial.print("Master pass val: ");
+  Serial.println(masterPassVal);
+
+  masterPass[0] = (masterPassVal >> 24) & 0xFF;
+  masterPass[1] = (masterPassVal >> 16) & 0xFF;
+  masterPass[2] = (masterPassVal >> 8) & 0xFF;
+  masterPass[3] = (masterPassVal >> 0) & 0xFF;
+  masterPass[4] = 0;
+  Serial.println(num1);
+  Serial.println(num2);
+  Serial.println(masterPass);
+
+}
+
+unsigned long getCurrentTime() {
+  unsigned long t = rtc.now().unixtime();
+  Serial.println(t);
+  return t;
 }
