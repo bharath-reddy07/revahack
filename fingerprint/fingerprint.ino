@@ -1,4 +1,5 @@
 #include <Adafruit_Fingerprint.h>
+
 #define mySerial Serial1
 
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
@@ -14,6 +15,8 @@ void setup() {
   Serial.println("\n\nAdafruit finger detect test");
 
   // set the data rate for the sensor serial port
+  mySerial.setTX(12);
+  mySerial.setRX(13);
   finger.begin(57600);
   delay(5);
   if (finger.verifyPassword()) {
