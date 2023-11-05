@@ -141,8 +141,8 @@ bool testMaster(AES256* aes256, byte* key_hash, const struct cipherVector* testC
   Serial.print(int(valid));
   return valid;
 }
-int redPin = 11;
-int greenPin = 11;
+int redPin = 16;
+int greenPin = 17;
 void setup() {
   Serial.begin(115200);
   Serial2.begin(115200);
@@ -165,8 +165,8 @@ void setup() {
       delay(1);
     }
   }
-  while (!Serial)
-    ;
+//  while (!Serial);
+
   setupDisplay();
 
   //setupRotaryEncoder();
@@ -308,6 +308,10 @@ void handleChange() {
     if (value == 1) {
       updateState(5);
       return;
+    }
+    if (value == 2){
+        backup();
+        return;
     }
   }
   if (state == 4) {
@@ -715,4 +719,14 @@ unsigned long getCurrentTime() {
   unsigned long t = rtc.now().unixtime();
   Serial.println(t);
   return t;
+}
+
+void backup(){
+  i2ceeprom.read((uint16_t)0, &numBlocks, (uint16_t)1);
+  
+  uint8_t readbuf[64];
+  for (int i=0; i<numBlocks+1; i++){
+    i2ceeprom.read(64*i, readbuf, 64); 
+    Serial.write(readbuf, 64);
+  }
 }

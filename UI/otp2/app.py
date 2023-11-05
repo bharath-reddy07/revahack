@@ -40,6 +40,12 @@ def get_otp():
 def backup():
     return render_template('backup.html')
 
+@app.route("/getBackup")
+def getBackup():
+    with open("backup.data", 'rb') as f:
+        data = f.read()
+    return {'data': str(data)}
+
 
 
 

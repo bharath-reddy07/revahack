@@ -12,12 +12,12 @@ Backups
         <div class="text-center">
             <div class="d-flex">
                 <button class="btn btn-primary btn-lg mr-5" id="backup-button" >Backup</button>
-                <button class="btn btn-primary btn-lg" id="display-button" >Display Backed Up Data</button>
+                <button class="btn btn-primary btn-lg" id="display-button" >Restore</button>
             </div>
         </div>
     </div>
-    <div id="backup-content" style="display: none;">
-        <p>Backup Successful</p>
+    <div id="backup-content">
+        
     </div>
     <div id="display-content" style="display: none;">
         <table class="table table-dark">
@@ -38,7 +38,7 @@ Backups
     </div>
 </div>
 
-<script>
+<!-- <script>
     document.getElementById('backup-button').addEventListener('click', function() {
         document.getElementById('backup-content').style.display = 'block';
         document.getElementById('display-content').style.display = 'none';
@@ -48,5 +48,7 @@ Backups
         document.getElementById('display-content').style.display = 'block';
         document.getElementById('backup-content').style.display = 'none';
     });
-</script>
+</script> -->
+
+<script src="../static/js/backup.js"></script>
 {% endblock %}

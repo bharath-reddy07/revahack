@@ -34,9 +34,11 @@ body {
     font-size: xx-large;
     border-color: #c5c7d2;
 
-    transition: opacity 30s;
+    transition: opacity 30s;    
+}
 
-    
+#dataResult{
+    word-wrap: break-word;
 }
 
 .btn-lg,
